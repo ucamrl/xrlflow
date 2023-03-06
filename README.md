@@ -1,20 +1,20 @@
-# XFLOWRL
+# XRLFLOW
 
-XFLOWRL is a GNN based neural network optimisation extension of [TASO](https://github.com/jiazhihao/TASO).
+XRLFLOW is a GNN based neural network optimisation extension of [TASO](https://github.com/jiazhihao/TASO).
 The basic idea was to substitute TASO's *cost-based backtracking search*
 and replace it with a RL-based optimisation. Potentially, this should be
 able to generalise to large unseen graphs and find better performing solutions
 than the backtracking search.
 
-XFLOWRL consists of three main parts:
+XRLFLOW consists of three main parts:
 
 1. An extension of the TASO library exposing a low-level RL environment
-2. A gym-style high-level environment written in Python, interacting with the XFLOWRL environment
+2. A gym-style high-level environment written in Python, interacting with the XRLFLOW environment
 3. A PPO agent interacting with this environment, iteratively applying graph substitutions to a target graph.
 
 ## Setup
 
-XFLOWRL interacts with TASO and thus depends on the TASO library. TASO on the other
+XRLFLOW interacts with TASO and thus depends on the TASO library. TASO on the other
 hand depends on a working CUDA and CuDNN installation.
 
 ### Installing Python
@@ -49,9 +49,9 @@ Then follow TASO's installation page.
 
 Note that, **check installation** by 'import taso' after built.
 
-### Installing XFLOWRL
+### Installing XRLFLOW
 
-The installation of XFLOWRL is very similar to that of TASO. First, make sure the environment
+The installation of XRLFLOW is very similar to that of TASO. First, make sure the environment
 variables are set:
 
 ```bash
