@@ -1,0 +1,132 @@
+absl-py==0.11.0
+anyio==2.1.0
+argon2-cffi==20.1.0
+astor==0.8.1
+astunparse==1.6.3
+async-generator==1.10
+attrs==20.3.0
+Babel==2.9.0
+backcall==0.2.0
+bleach==3.3.0
+cachetools==4.2.0
+certifi==2020.12.5
+cffi==1.14.5
+chardet==4.0.0
+cloudpickle==1.6.0
+cma==3.0.3
+contextlib2==0.6.0.post1
+cycler==0.10.0
+Cython==0.29.21
+decorator==4.4.2
+defusedxml==0.6.0
+dm-sonnet==2.0.0
+dm-tree==0.1.5
+entrypoints==0.3
+future==0.18.2
+gast==0.3.3
+google-auth==1.24.0
+google-auth-oauthlib==0.4.2
+google-pasta==0.2.0
+graph-nets==1.1.0
+grpcio==1.35.0
+gviz-api==1.9.0
+gym==0.18.0
+h5py==2.10.0
+idna==2.10
+importlib-metadata==3.4.0
+ipykernel==5.5.0
+<<<<<<< HEAD:requirements.txt
+=======
+>>>>>>> master:pip.freeze
+jedi==0.18.0
+Jinja2==2.11.3
+json5==0.9.5
+jsonschema==3.2.0
+<<<<<<< HEAD:requirements.txt
+=======
+>>>>>>> master:pip.freeze
+Keras-Applications==1.0.8
+Keras-Preprocessing==1.1.2
+kiwisolver==1.3.1
+Markdown==3.3.3
+MarkupSafe==1.1.1
+<<<<<<< HEAD:requirements.txt
+=======
+>>>>>>> master:pip.freeze
+matplotlib==3.3.4
+mistune==0.8.4
+nbclassic==0.2.6
+nbclient==0.5.2
+nbconvert==6.0.7
+nbformat==5.1.2
+nest-asyncio==1.5.1
+networkx==2.5
+notebook==6.2.0
+numpy==1.18.5
+oauthlib==3.1.0
+onnx==1.8.0
+onnx-tf==1.8.0
+opt-einsum==3.3.0
+packaging==20.9
+pandas==1.1.5
+pandocfilters==1.4.3
+parso==0.8.1
+pexpect==4.8.0
+pickleshare==0.7.5
+Pillow==7.2.0
+prometheus-client==0.9.0
+prompt-toolkit==3.0.16
+protobuf==3.14.0
+ptyprocess==0.7.0
+pyasn1==0.4.8
+pyasn1-modules==0.2.8
+pycparser==2.20
+pyglet==1.5.0
+Pygments==2.8.0
+pyparsing==2.4.7
+pyrsistent==0.17.3
+python-dateutil==2.8.1
+pytz==2021.1
+PyYAML==5.4.1
+pyzmq==22.0.3
+requests==2.25.1
+requests-oauthlib==1.3.0
+rsa==4.7
+<<<<<<< HEAD:requirements.txt
+=======
+>>>>>>> master:pip.freeze
+scipy==1.5.4
+seaborn==0.11.1
+semantic-version==2.8.5
+Send2Trash==1.5.0
+six==1.15.0
+sniffio==1.2.0
+tabulate==0.8.7
+taso==0.1.0
+tensorboard==2.4.1
+tensorboard-plugin-profile==2.4.0
+tensorboard-plugin-wit==1.8.0
+tensorflow==2.3.2
+tensorflow-addons==0.12.1
+tensorflow-estimator==2.3.0
+tensorflow-probability==0.11.1
+termcolor==1.1.0
+terminado==0.9.2
+testpath==0.4.4
+tornado==6.1
+traitlets==4.3.3
+<<<<<<< HEAD:requirements.txt
+=======
+>>>>>>> master:pip.freeze
+typeguard==2.12.0
+typing-extensions==3.7.4.3
+tqdm==4.62.3
+urllib3==1.26.2
+wcwidth==0.2.5
+webencodings==0.5.1
+Werkzeug==1.0.1
+wrapt==1.12.1
+<<<<<<< HEAD:requirements.txt
+=======
+>>>>>>> master:pip.freeze
+zipp==3.4.0

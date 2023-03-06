@@ -1,0 +1,45 @@
+# build xflowRL in ran's docker container
+
+======
+# image (IMPORTANT: make sure the container has CUDA runtime and driver, i.e. nvcc --version + nvidia-smi)
+
+sudo docker run --rm --gpus all nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04 nvidia-smi
+======
+
+# if use ubuntu 18.04 - need to update protobuf, IMPORTANT: protocbuf must be >= 3.6.1
+sudo apt-get install autoconf automake libtool curl make g++ unzip -y
+wget https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.6.1.zip
+unzip v3.6.1.zip
+cd protobuf
+./autogen.sh
+./configure
+make
+make check (not necessary if no google test)
+sudo make install
+sudo ldconfig
+# check version via (protoc --version)
+
+# install cmake 3.15.0
+sudo apt-get install build-essential
+wget http://www.cmake.org/files/v3.15/cmake-3.15.0.tar.gz
+tar xf cmake-3.15.0.tar.gz
+cd cmake-3.15.0
+./bootstrap
+make
+make install
+
+
+# patch:
+src/core/ops.cc:1628; change int -> size_t
+src/core/ops.cc:1565; add another last args to BatchNorm 0.001 (small value for etc in batchnorm formula)
+
+# build TASO (IMPORTANT follow taso's build page)
+# Meanwhile, make sure you run import taso in a directory other than taso/python.
+
+
+# if cannot find rules.pb.h
+# copy directly from $TASO_HOME/src/generator -> /usr/local/include/taso
+
+
+# find all nvidia devices (in host)
+ls -la /dev | grep nvidia

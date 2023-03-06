@@ -1,0 +1,74 @@
+Index: include/taso/cuda_helper.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- include/taso/cuda_helper.h	(revision a310b60ff03842fe4a3f0fc7c423cf8b4883851b)
++++ include/taso/cuda_helper.h	(revision 9ea6c78a6e1584c441c9c205c3b3f73592ff0d51)
+@@ -17,7 +17,7 @@
+ #define checkCUDNN(status) do {                                        \
+     std::stringstream _error;                                          \
+     if (status != CUDNN_STATUS_SUCCESS) {                              \
+-      _error << "CUDNN failure: " << cudnnGetErrorString(status);      \
++      _error << "CUDNN failure (MAX_TENSOR_SIZE) " << MAX_TENSOR_SIZE << ": " << cudnnGetErrorString(status);      \
+       FatalError(_error.str());                                        \
+     }                                                                  \
+ } while(0)
+@@ -25,7 +25,7 @@
+ #define checkCUDA(status) do {                                         \
+     std::stringstream _error;                                          \
+     if (status != 0) {                                                 \
+-      _error << "Cuda failure: " << status;                            \
++      _error << "Cuda failure: (MAX_TENSOR_SIZE) " << MAX_TENSOR_SIZE << ":  " << status;                            \
+       FatalError(_error.str());                                        \
+     }                                                                  \
+ } while(0)
+Index: include/taso/ops.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- include/taso/ops.h	(revision a310b60ff03842fe4a3f0fc7c423cf8b4883851b)
++++ include/taso/ops.h	(revision 9ea6c78a6e1584c441c9c205c3b3f73592ff0d51)
+@@ -55,10 +55,12 @@
+ #define MAX_NUM_INPUTS 6
+ #define MAX_NUM_OUTPUTS 6
+ #define BATCH_SIZE 1
+-#define MAX_TENSOR_SIZE 512 * 1024 * 1024 // 512MB
++//#define MAX_TENSOR_SIZE 512 * 1024 * 1024 // 512MB
++#define MAX_TENSOR_SIZE 128 * 1024 * 1024 // 128MB
+ #define REPEAT_TIMES 32
+ #define WARMUP_TIMES 8
+-const size_t WORK_SPACE_SIZE = (size_t)2 * 1024 * 1024 * 1024; // 2GB
++//const size_t WORK_SPACE_SIZE = (size_t)1 * 1024 * 1024 * 1024; // 1GB
++const size_t WORK_SPACE_SIZE = (size_t)512 * 1024 * 1024; // 512MB
+ typedef float DATATYPE;
+ 
+ class Model;
+Index: python/taso/_cython/core.pyx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- python/taso/_cython/core.pyx	(revision a310b60ff03842fe4a3f0fc7c423cf8b4883851b)
++++ python/taso/_cython/core.pyx	(revision 9ea6c78a6e1584c441c9c205c3b3f73592ff0d51)
+@@ -21,6 +21,7 @@
+ import ctypes
+ import array
+ import numpy as np
++from libc.stdint cimport uintptr_t
+ 
+ #helper function
+ def get_padding_mode(padding):
+@@ -163,6 +164,11 @@
+         else:
+             ptr = ctypes.cast(graph, ctypes.c_void_p).value
+             self.p_graph = <Graph*>(ptr)
++
++    def get_ptr_addr(self):
++        cdef uintptr_t ptr
++        return <uintptr_t>self.p_graph
++
+     def print_measurements(self):
+         self.p_graph.print_measurements()
+ 

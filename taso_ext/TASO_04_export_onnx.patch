@@ -1,0 +1,19 @@
+Index: python/taso/__init__.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/python/taso/__init__.py b/python/taso/__init__.py
+--- a/python/taso/__init__.py	(revision d25ed2859653f6a0be000e69729b858275312b65)
++++ b/python/taso/__init__.py	(revision 7240f418de6fd371281fb364fc790fc32e003bdb)
+@@ -908,8 +908,8 @@
+             inputs.append(_input_tensor_name(graph, e, op))
+             output_guids.pop((e['srcOp']['guid'], e['srcIdx']), None)
+             if intype == 'Input' or intype == 'Weight':
+-                graph_inputs.append(helper.make_tensor_value_info(_input_tensor_name(graph, e, op),
+-                                    TensorProto.FLOAT, graph.get_input_dims(op, e['dstIdx'])))
++                graph_inputs.append(helper.make_tensor(_input_tensor_name(graph, e, op), TensorProto.FLOAT,
++                                                       graph.get_input_dims(op, e['dstIdx'])))
+             if intype == 'Weight':
+                 graph_initializers.append(helper.make_tensor(_input_tensor_name(graph, e, op),
+                                           TensorProto.FLOAT, graph.get_input_dims(op, e['dstIdx']),

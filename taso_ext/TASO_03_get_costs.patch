@@ -1,0 +1,471 @@
+Index: include/taso/ops.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git include/taso/ops.h include/taso/ops.h
+--- include/taso/ops.h	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ include/taso/ops.h	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -662,6 +662,7 @@
+   float total_cost(void);
+   float run();
+   void print_costs(void);
++  void get_costs(float* exe_time, float* flops, float* mem_acc, int* num_kernels);
+   void print_measurements(void);
+ #ifdef TRT
+   void buildTRTNetwork(INetworkDefinition *network);
+Index: python/taso/_cython/CCore.pxd
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git python/taso/_cython/CCore.pxd python/taso/_cython/CCore.pxd
+--- python/taso/_cython/CCore.pxd	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ python/taso/_cython/CCore.pxd	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -272,4 +272,5 @@
+         int get_output_dims(size_t guid, int* dims, int idx)
+         void print_measurements()
+         float total_cost()
++        void get_costs(float* exe_time, float* flops, float* mem_acc, int* num_kernels)
+         float run()
+Index: python/taso/_cython/core.pyx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git python/taso/_cython/core.pyx python/taso/_cython/core.pyx
+--- python/taso/_cython/core.pyx	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ python/taso/_cython/core.pyx	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -662,3 +662,14 @@
+             return [0]
+         else:
+            assert False, 'Internal error: unknow attribute {}'.format(attrname)
++
++    def get_costs(self):
++        cdef:
++            float exe_time = 0.0, flops = 0.0, mem_acc = 0.0
++            float* exe_time_ref = &exe_time
++            float* flops_ref = &flops
++            float* mem_acc_ref = &mem_acc
++            int num_kernels
++            int* num_kernels_ref = &num_kernels
++        self.p_graph.get_costs(exe_time_ref, flops_ref, mem_acc_ref, num_kernels_ref)
++        return exe_time_ref[0], flops_ref[0], mem_acc_ref[0], num_kernels_ref[0]
+Index: src/core/activation.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/activation.cc src/core/activation.cc
+--- src/core/activation.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/activation.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -107,8 +107,8 @@
+     flops += outputSize;
+   mem_acc += inputSize;
+   num_kernels += 1;
+-  printf("        cost[Activation]: mode(%d) cost(%.4lf) total_cost(%.4lf)\n",
+-         type, runtime, exe_time);
++  // printf("        cost[Activation]: mode(%d) cost(%.4lf) total_cost(%.4lf)\n",
++  //       type, runtime, exe_time);
+ }
+ 
+ // Key ordering: type, inPlace, _input
+Index: src/core/batchnorm.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/batchnorm.cc src/core/batchnorm.cc
+--- src/core/batchnorm.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/batchnorm.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -109,9 +109,9 @@
+   flops += outputSize * 2;
+   mem_acc += inputSize;
+   num_kernels += 1;
+-  printf("        cost[BatchNorm]: i(%d %d %d %d) cost(%.4lf) total_cost(%.4lf)\n",
+-          inputs[0].dim[0], inputs[0].dim[1], inputs[0].dim[2], inputs[0].dim[3],
+-          runtime, exe_time);
++  // printf("        cost[BatchNorm]: i(%d %d %d %d) cost(%.4lf) total_cost(%.4lf)\n",
++  //        inputs[0].dim[0], inputs[0].dim[1], inputs[0].dim[2], inputs[0].dim[3],
++  //        runtime, exe_time);
+ }
+ 
+ // key is (_input)
+Index: src/core/broadcast_add.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/broadcast_add.cc src/core/broadcast_add.cc
+--- src/core/broadcast_add.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/broadcast_add.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -72,9 +72,9 @@
+   flops += outputs[0].volume();
+   mem_acc += outputs[0].volume() * 2;
+   num_kernels += 1;
+-  printf("        cost[BroadcastAdd]: i(%d %d %d %d) cost(%.4lf) total_cost(%.4lf)\n",
+-          inputs[0].dim[0], inputs[0].dim[1], inputs[0].dim[2], inputs[0].dim[3],
+-          runtime, exe_time);
++  //printf("        cost[BroadcastAdd]: i(%d %d %d %d) cost(%.4lf) total_cost(%.4lf)\n",
++  //        inputs[0].dim[0], inputs[0].dim[1], inputs[0].dim[2], inputs[0].dim[3],
++  //        runtime, exe_time);
+ }
+ 
+ // key is (_conv_w)
+Index: src/core/cast.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/cast.cc src/core/cast.cc
+--- src/core/cast.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/cast.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -67,8 +67,8 @@
+   flops += outputs[0].volume();
+   mem_acc += inputs[0].volume();
+   num_kernels += 1;
+-  printf("        cost[Cast]: cost(%.4lf) total_cost(%.4lf)\n",
+-         runtime, exe_time);
++//  printf("        cost[Cast]: cost(%.4lf) total_cost(%.4lf)\n",
++//         runtime, exe_time);
+ }
+ 
+ CastKey::CastKey(const Tensor& _input, DataType _datatype)
+Index: src/core/concat.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/concat.cc src/core/concat.cc
+--- src/core/concat.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/concat.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -131,8 +131,8 @@
+   exe_time += runtime;
+   flops += 0;
+   num_kernels += 1;
+-  printf("        cost[Concat]: numInputs(%d) cost(%.4lf) total_cost(%.4lf)\n",
+-         numInputs, runtime, exe_time);
++//  printf("        cost[Concat]: numInputs(%d) cost(%.4lf) total_cost(%.4lf)\n",
++//         numInputs, runtime, exe_time);
+ }
+ 
+ int bitmask(int n, bool* bits)
+Index: src/core/conv2d.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/conv2d.cc src/core/conv2d.cc
+--- src/core/conv2d.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/conv2d.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -286,10 +286,10 @@
+     flops += outputSize;
+   mem_acc += inputSize + outputSize + weightSize;
+   num_kernels += 1;
+-  printf("        cost[Conv2D]: i(%d %d %d %d) w(%d %d %d %d) s(%d %d) p(%d) cost(%.4lf) total_cost(%.4lf)\n",
+-          inputs[0].dim[0], inputs[0].dim[1], inputs[0].dim[2], inputs[0].dim[3],
+-          inputs[1].dim[0], inputs[1].dim[1], inputs[1].dim[2], inputs[1].dim[3],
+-          strideH, strideW, padding, runtime, exe_time);
++//  printf("        cost[Conv2D]: i(%d %d %d %d) w(%d %d %d %d) s(%d %d) p(%d) cost(%.4lf) total_cost(%.4lf)\n",
++//          inputs[0].dim[0], inputs[0].dim[1], inputs[0].dim[2], inputs[0].dim[3],
++//          inputs[1].dim[0], inputs[1].dim[1], inputs[1].dim[2], inputs[1].dim[3],
++//          strideH, strideW, padding, runtime, exe_time);
+ }
+ 
+ // keys are (inputN, inputC, inputH, inputW, outputC, kernelH, kernelW,
+Index: src/core/element.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/element.cc src/core/element.cc
+--- src/core/element.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/element.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -125,7 +125,7 @@
+   flops += outputSize;
+   mem_acc += inputSize * 2;
+   num_kernels += 1;
+-  printf("        cost[Element]: cost(%.4lf) total_cost(%.4lf)\n", runtime, exe_time);
++  //printf("        cost[Element]: cost(%.4lf) total_cost(%.4lf)\n", runtime, exe_time);
+ }
+ 
+ // Key ordering: type, input
+Index: src/core/elementwise_unary.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/elementwise_unary.cc src/core/elementwise_unary.cc
+--- src/core/elementwise_unary.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/elementwise_unary.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -99,8 +99,8 @@
+   flops += outputs[0].volume();
+   mem_acc += inputs[0].volume();
+   num_kernels += 1;
+-  printf("        cost[ElementWiseUnary]: mode(%d) cost(%.4lf) total_cost(%.4lf)\n",
+-         type, runtime, exe_time);
++//  printf("        cost[ElementWiseUnary]: mode(%d) cost(%.4lf) total_cost(%.4lf)\n",
++//         type, runtime, exe_time);
+ }
+ 
+ ElementWiseUnaryKey::ElementWiseUnaryKey(const Tensor& _input, OpType _type)
+Index: src/core/fuse_conv_batchnorm.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/fuse_conv_batchnorm.cc src/core/fuse_conv_batchnorm.cc
+--- src/core/fuse_conv_batchnorm.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/fuse_conv_batchnorm.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -88,9 +88,9 @@
+   flops += outputs[0].volume();
+   mem_acc += outputs[0].volume() * 2;
+   num_kernels += 1;
+-  printf("        cost[FuseConvBatchNorm]: i(%d %d %d %d) cost(%.4lf) total_cost(%.4lf)\n",
+-          inputs[0].dim[0], inputs[0].dim[1], inputs[0].dim[2], inputs[0].dim[3],
+-          runtime, exe_time);
++//  printf("        cost[FuseConvBatchNorm]: i(%d %d %d %d) cost(%.4lf) total_cost(%.4lf)\n",
++//          inputs[0].dim[0], inputs[0].dim[1], inputs[0].dim[2], inputs[0].dim[3],
++//          runtime, exe_time);
+ }
+ 
+ // key is (_conv_w)
+Index: src/core/fuse_conv_batchnorm_alpha_var.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/fuse_conv_batchnorm_alpha_var.cc src/core/fuse_conv_batchnorm_alpha_var.cc
+--- src/core/fuse_conv_batchnorm_alpha_var.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/fuse_conv_batchnorm_alpha_var.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -80,9 +80,9 @@
+   flops += outputs[0].volume();
+   mem_acc += outputs[0].volume() * 2;
+   num_kernels += 1;
+-  printf("        cost[FuseConvBatchNormAlphaVar]: i(%d %d %d %d) cost(%.4lf) total_cost(%.4lf)\n",
+-          inputs[0].dim[0], inputs[0].dim[1], inputs[0].dim[2], inputs[0].dim[3],
+-          runtime, exe_time);
++//  printf("        cost[FuseConvBatchNormAlphaVar]: i(%d %d %d %d) cost(%.4lf) total_cost(%.4lf)\n",
++//          inputs[0].dim[0], inputs[0].dim[1], inputs[0].dim[2], inputs[0].dim[3],
++//          runtime, exe_time);
+ }
+ 
+ // key is (_conv_w)
+Index: src/core/fuse_conv_batchnorm_bias.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/fuse_conv_batchnorm_bias.cc src/core/fuse_conv_batchnorm_bias.cc
+--- src/core/fuse_conv_batchnorm_bias.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/fuse_conv_batchnorm_bias.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -84,9 +84,9 @@
+   flops += outputs[0].volume();
+   mem_acc += outputs[0].volume() * 2;
+   num_kernels += 1;
+-  printf("        cost[FuseConvBatchNormBias]: i(%d) cost(%.4lf) total_cost(%.4lf)\n",
+-          inputs[0].dim[0],
+-          runtime, exe_time);
++//  printf("        cost[FuseConvBatchNormBias]: i(%d) cost(%.4lf) total_cost(%.4lf)\n",
++//          inputs[0].dim[0],
++//          runtime, exe_time);
+ }
+ 
+ // key is (_conv_w)
+Index: src/core/matmul.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/matmul.cc src/core/matmul.cc
+--- src/core/matmul.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/matmul.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -126,10 +126,10 @@
+   flops += outputSize * inputs[0].dim[inputs[0].numDim-1];
+   mem_acc += inputSize;
+   num_kernels += 1;
+-  printf("        cost[Matmul]: %s %s cost(%.4lf) total_cost(%.4lf)\n",
+-         inputs[0].to_string("input").c_str(),
+-         inputs[1].to_string("weight").c_str(),
+-         runtime, exe_time);
++//  printf("        cost[Matmul]: %s %s cost(%.4lf) total_cost(%.4lf)\n",
++//         inputs[0].to_string("input").c_str(),
++//         inputs[1].to_string("weight").c_str(),
++//         runtime, exe_time);
+ }
+ 
+ // key is (inputN, inputC, outputC, acti)
+Index: src/core/ops.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/ops.cc src/core/ops.cc
+--- src/core/ops.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/ops.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -1401,3 +1401,13 @@
+          mem_acc * 4.0 / 1024.0 / 1024.0, num_kernels);
+ }
+ 
++void Graph::get_costs(float* exe_time, float* flops, float* mem_acc, int* num_kernels)
++{
++    std::map<Op, std::set<Edge, EdgeCompare>, OpCompare>::const_iterator it;
++    for (it = inEdges.begin(); it != inEdges.end(); it++) {
++        it->first.ptr->collect_costs(*exe_time, *flops, *mem_acc, *num_kernels);
++    }
++    *flops = *flops / 1024.0 / 1024.0 / 1024.0;
++    *mem_acc *= 4.0 / 1024.0 / 1024.0;
++}
++
+Index: src/core/pad.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/pad.cc src/core/pad.cc
+--- src/core/pad.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/pad.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -88,8 +88,8 @@
+   flops += inputs[0].volume();
+   mem_acc += inputs[0].volume() + outputs[0].volume();
+   num_kernels += 1;
+-  printf("      cost[Pad]: cost(%.4lf) total_cost(%.4lf)\n",
+-         runtime, exe_time);
++//  printf("      cost[Pad]: cost(%.4lf) total_cost(%.4lf)\n",
++//         runtime, exe_time);
+ }
+ 
+ PadKey::PadKey(const Tensor& _input,
+Index: src/core/pool2d.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/pool2d.cc src/core/pool2d.cc
+--- src/core/pool2d.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/pool2d.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -242,9 +242,9 @@
+   flops += outputSize * kernelH * kernelW;
+   mem_acc += inputSize;
+   num_kernels += 1;
+-  printf("        cost[Pool2D]: i(%d %d %d %d) k(%d %d) s(%d %d) cost(%.4lf) total_cost(%.4lf)\n",
+-         inputs[0].dim[0], inputs[0].dim[1], inputs[0].dim[2], inputs[0].dim[3],
+-         kernelH, kernelW, strideH, strideW, runtime, exe_time);
++//  printf("        cost[Pool2D]: i(%d %d %d %d) k(%d %d) s(%d %d) cost(%.4lf) total_cost(%.4lf)\n",
++//         inputs[0].dim[0], inputs[0].dim[1], inputs[0].dim[2], inputs[0].dim[3],
++//         kernelH, kernelW, strideH, strideW, runtime, exe_time);
+ }
+ 
+ // keys are (kernelH, kernelW, strideH, strideW, padding, activation, _type,
+Index: src/core/reduce.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/reduce.cc src/core/reduce.cc
+--- src/core/reduce.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/reduce.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -170,8 +170,8 @@
+   flops += inputs[0].volume();
+   mem_acc += inputs[0].volume() + outputs[0].volume();
+   num_kernels += 1;
+-  printf("      cost[Reduce]: cost(%.4lf) total_cost(%.4lf)\n",
+-         runtime, exe_time);
++//  printf("      cost[Reduce]: cost(%.4lf) total_cost(%.4lf)\n",
++//         runtime, exe_time);
+ }
+ 
+ ReduceKey::ReduceKey(const Tensor& _input, OpType _type,
+Index: src/core/shape.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/shape.cc src/core/shape.cc
+--- src/core/shape.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/shape.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -76,8 +76,8 @@
+ {
+   exe_time += runtime;
+   num_kernels += 1;
+-  printf("      cost[Shape]: cost(%.4lf) total_cost(%.4lf)\n",
+-         runtime, exe_time);
++//  printf("      cost[Shape]: cost(%.4lf) total_cost(%.4lf)\n",
++//         runtime, exe_time);
+ }
+ 
+ ShapeKey::ShapeKey(const Tensor& _input, OpType _type)
+Index: src/core/split.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/split.cc src/core/split.cc
+--- src/core/split.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/split.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -195,8 +195,8 @@
+   flops += 0;
+   mem_acc += 0;
+   num_kernels += 0;
+-  printf("        cost[Split]: numOutputs(%d) cost(%.4lf) total_cost(%.4lf)\n",
+-         numOutputs, 0.0f, exe_time);
++//  printf("        cost[Split]: numOutputs(%d) cost(%.4lf) total_cost(%.4lf)\n",
++//         numOutputs, 0.0f, exe_time);
+ }
+ 
+ void Model::measure_split_cost(Split* split)
+Index: src/core/squeeze.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/squeeze.cc src/core/squeeze.cc
+--- src/core/squeeze.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/squeeze.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -82,8 +82,8 @@
+ {
+   exe_time += runtime;
+   num_kernels += 1;
+-  printf("        cost[Squeeze]: cost(%.4lf) total_cost(%.4lf)\n",
+-         runtime, exe_time);
++//  printf("        cost[Squeeze]: cost(%.4lf) total_cost(%.4lf)\n",
++//         runtime, exe_time);
+ }
+ 
+ SqueezeKey::SqueezeKey(const Tensor& input,
+Index: src/core/topk.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/topk.cc src/core/topk.cc
+--- src/core/topk.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/topk.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -84,8 +84,8 @@
+ {
+   exe_time += runtime;
+   num_kernels += 1;
+-  printf("      cost[TopK]: cost(%.4lf) total_cost(%.4lf)\n",
+-         runtime, exe_time);
++//  printf("      cost[TopK]: cost(%.4lf) total_cost(%.4lf)\n",
++//         runtime, exe_time);
+ }
+ 
+ TopKKey::TopKKey(const Tensor& _input,
+Index: src/core/where.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git src/core/where.cc src/core/where.cc
+--- src/core/where.cc	(revision 0b01194974a1dfcf624f64f21e3fe5b99ddccec8)
++++ src/core/where.cc	(revision d25ed2859653f6a0be000e69729b858275312b65)
+@@ -132,7 +132,7 @@
+   flops += outputs[0].volume();
+   mem_acc += 4 * outputs[0].volume();
+   num_kernels += 1;
+-  printf("        cost[Where]: cost(%.4lf) total_cost(%.4lf)\n", runtime, exe_time);
++  // printf("        cost[Where]: cost(%.4lf) total_cost(%.4lf)\n", runtime, exe_time);
+ }
+ 
+ WhereKey::WhereKey(const Tensor& _cond,
