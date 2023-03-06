@@ -1,0 +1,8 @@
+setup.py
+taso/__init__.py
+taso.egg-info/PKG-INFO
+taso.egg-info/SOURCES.txt
+taso.egg-info/dependency_links.txt
+taso.egg-info/not-zip-safe
+taso.egg-info/top_level.txt
+taso/_cython/core.cpp
