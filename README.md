@@ -31,7 +31,7 @@ It is **recommanded** to use a nvidia docker
 
 ### Installing TASO
 
-Build taso in the "third\_party" directory, follow its instructions
+Build taso in the "taso-build" directory, follow its instructions
 
 Most importantly, set the `TASO_HOME` variable:
 
